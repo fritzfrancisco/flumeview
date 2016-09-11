@@ -5,10 +5,10 @@ FlumeView is divided up into a command line interface (cli) which manages the ex
 
 |Argument       | Use           |Default |
 |:-------------: |:-------------| :-----|
-|- a | minimum area size|100 |
+|- a | minimum area size of tracked blob|100 |
 |- c |definition of center by clicking on first frame displayed in window | False|
 |- r | refresh every n frames|1 |
-| - s| show frames| False|
+| - s| show frame| False|
 |- t |define timelimit | sys.maxint|
 | - w |seconds waited,before initiation |1 |
 | - x |relative x coordinate of center|0.5 |
