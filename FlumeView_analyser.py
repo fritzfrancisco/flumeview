@@ -8,7 +8,7 @@ import cv2
 import os.path
 
 from PyQt4.QtCore import QObject, pyqtSignal, pyqtSlot
-from scipy.spatial import distance
+#from scipy.spatial import distance
 
 xyreturn = None
 
@@ -155,7 +155,7 @@ class analyser(QObject):
 
 
                             # Calculating euclidean distance between points:
-                            dist_euclidean = distance.euclidean(previous_element,element)
+                            dist_euclidean = np.linalg.norm(np.array(previous_element)-np.array(element))
                             self.dist.append(dist_euclidean % 30)
                             dist = self.dist[-5:]
                             #dist_mean = cv2.mean(np.array(self.dist))
