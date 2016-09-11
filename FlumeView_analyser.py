@@ -171,7 +171,6 @@ class analyser(QObject):
                                 #cv2.line(frame,element,previous_element,(125,20,200),2)
                                 #print(frame_count)
 
-
                     fish_x = float(x+w/2) / float(width)
                     fish_y = float(y+h/2) / float(height)
                     # area_A = 0
