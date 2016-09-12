@@ -21,7 +21,9 @@ FlumeView is divided up into a command line interface which manages the external
 |:-------------: |:-------------| :-----|
 |-a | minimum area size of tracked blob|100 |
 |-c |definition of center of four test chambers by clicking on first frame displayed in a separate window | False|
-|-p| print data to file| on|
+|-d|save frame number, x- and y-coordinates to given file |no default|
+|-i|save live view tracking image to given file|no default|
+|-p| save combined data to given file| no default|
 |-r | refresh plot every n frames|1 |
 | -s| show frame| False|
 |-t |define timelimit | sys.maxint|
@@ -34,12 +36,40 @@ FlumeView is divided up into a command line interface which manages the external
 ## Commandline Example:
 
 ```bash
-python2 FlumeView_cli.py -v D.rerio_test_wf1.dvd -s True -c True -r 100 -w 5
+python2 FlumeView_cli.py -v D.rerio_test_wf1.dvd -s True -c True -r 100 -w 5 -t 10 -d D_test_data
 ```
+
+## Data Input
+The library used in this application is based on the open source project OpenCv  (<http://opencv.org/>) which is a powerful video and image computation platform. Therefore, FlumeView directly supports most common video extensions.
+
 
 ## Data Output
 
-The data is emitted as ```.csv ``` file in the folder in which the  ```FlumeView_cli.py ``` file is located in the following format:
+When saving data to a file the expressions ```-d``` ,```-p``` or ```-i``` can be utilized.
+
+* ```-d```: dump
+
+File name, frame count, and (relative) fish x- and y-coordinates for each frame are stored as row in a single ```.csv ``` file with the given name. However, the file is overwritten if the exact file already exists. This can be changed by exchanging the ```'w'``` for an ```'a'``` (append) in ```with open(args["dump"],'w') as csvfile:``` of the ```FlumeView_cli.py``` script. However, additional changes may be needed to ensure that the file is recognized if already present.
+
+The data when using the ```-d``` command is emitted as ```.csv ``` file in the folder in which the  ```FlumeView_cli.py ``` file is located in the following format:
+
+|File|x_Coord|Y_Coord|Frame_number||
+|:---|:---|:---|:---|
+|D.rerio_test_wf1.dvd|0.61|0.6636636636636637|90|
+|D.rerio_test_wf1.dvd|0.61|0.6606606606606606|91|
+|D.rerio_test_wf1.dvd|0.612|0.6636636636636637|92|
+|D.rerio_test_wf1.dvd|0.612|0.6636636636636637|93|
+|D.rerio_test_wf1.dvd|0.612|0.6636636636636637|94|
+
+* ```-i``` : image
+
+The ```FlumeView - Live``` output, with marking is saved to a image file after tracking is completed. The file extension can freely be chosen between ```.jpg```,```.jpeg```,```.png``` and ```.tiff``` and should be added as file name extension. Files with the same name and extension within the folder in which the  ```FlumeView_cli.py ``` file is located are overwritten.
+
+* ```-p``` : print
+
+File name, total time, channel A, channel B, area A and area B is saved to the given file as ```.csv ``` row after tracking is complete. If the given file name already exists, the new data is appended to this file as new row as well and the file is not replaced. This can be altered by exchanging the ```'a'``` for ```'w'``` in ```with open(args["print"],'a') as csvfile:``` of the ```FlumeView_cli.py``` script. However, additional changes may be needed to ensure that the file is recognized if already present.
+
+The data when using the ```-p``` command is emitted as ```.csv ``` file in the folder in which the  ```FlumeView_cli.py ``` file is located in the following format:
 
 |File|Total Time [s]|Channel_A [s]|Channel_B [s]|Area_A [s]|Area_B [s]|
 |:---|:---|:---|:---|:---|:---|

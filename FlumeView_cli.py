@@ -150,7 +150,7 @@ if args["dump"] != "":
     #dump_exists=os.path.isfile(args["dump"])
 
     with open(args["dump"],'w') as csvfile:
-        dw=csv.DictWriter(csvfile,delimiter=',',fieldnames=["file","frame number","x coord","y coord"],lineterminator='\n')
+        dw=csv.DictWriter(csvfile,delimiter=',',fieldnames=["File","x_Coord","Y_Coord","Frame_number"],lineterminator='\n')
         writer=csv.writer(csvfile)
         dw.writeheader()
 
