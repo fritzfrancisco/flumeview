@@ -60,4 +60,3 @@ def calculate(x,y,divide_x,divide_y):
               area_B += 1
 
     print(area_A,area_B,channel_A,channel_B)
-    #return

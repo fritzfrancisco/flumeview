@@ -8,7 +8,6 @@ import cv2
 import os.path
 
 from PyQt4.QtCore import QObject, pyqtSignal, pyqtSlot
-#from scipy.spatial import distance
 
 xyreturn = None
 
@@ -57,12 +56,12 @@ class analyser(QObject):
         self.capture = self.set_input(videofile)
         self.divide_x = x
         self.divide_y = y
+        self.wait = wait
         self.firstFrame = None
         self.min_area = min_area
         self.timelimit = timelimit
         self.refresh = refresh
         self.show = show
-
 
     def set_input(self, videofile):
          """Get capture of video file.If not defined, return Webcam output """
@@ -80,6 +79,7 @@ class analyser(QObject):
         #cv2.namedWindow("Security Feed")
 
         self.fps = self.capture.get(cv2.cv.CV_CAP_PROP_FPS)
+
         frame_count = 0
 
         self.trace_xy = []
@@ -107,7 +107,7 @@ class analyser(QObject):
             	# if the frame could not be grabbed, then we have reached the end
             	# of the video
                 if not grabbed:
-                    print("end start")
+                    print("finished")
                     return(-1,-1)
 
 
@@ -121,7 +121,6 @@ class analyser(QObject):
                     self.firstFrame = gray
 
                 #if self.firstFrame is None:
-
                 frame_count += 1
 
             	# compute the absolute difference between the current frame and
@@ -156,8 +155,8 @@ class analyser(QObject):
 
                             # Calculating euclidean distance between points:
                             dist_euclidean = np.linalg.norm(np.array(previous_element)-np.array(element))
-                            self.dist.append(dist_euclidean % 30)
-                            dist = self.dist[-5:]
+                            self.dist.append(dist_euclidean)
+                            self.dist = self.dist[-5:]
                             #dist_mean = cv2.mean(np.array(self.dist))
                             dist_mean = np.mean(self.dist)
                             #print(self.dist_mean[0])
@@ -186,7 +185,7 @@ class analyser(QObject):
                     self.height,self.width,channel = frame.shape
 
             if self.show == True:
-                cv2.imshow("Security Feed",frame)
+                cv2.imshow("FlumeView - Live",frame)
                 cv2.waitKey(25)
 
 

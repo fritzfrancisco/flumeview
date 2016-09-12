@@ -1,18 +1,19 @@
 # FlumeView
 Application for analysing and tracking fish in classical fluming tests.
 
-FlumeView is divided up into a command line interface (cli) which manages the external commands, the analyser which analyses the tracking data and the stats file which manages all calculations.
+FlumeView is divided up into a command line interface which manages the external commands, the analyser which analyses the tracking data and the stats file which manages all calculations.
 
 |Argument       | Use           |Default |
 |:-------------: |:-------------| :-----|
-|- a | minimum area size of tracked blob|100 |
-|- c |definition of center by clicking on first frame displayed in window | False|
-|- r | refresh every n frames|1 |
-| - s| show frame| False|
-|- t |define timelimit | sys.maxint|
-| - w |seconds waited,before initiation |1 |
-| - x |relative x coordinate of center|0.5 |
-| - y |relative y coordinate of center| 0.5|
+|-a | minimum area size of tracked blob|100 |
+|-c |definition of center by clicking on first frame displayed in a seperate window | False|
+|-r | refresh plot every n frames|1 |
+| -s| show frame| False|
+|-t |define timelimit | sys.maxint|
+|-v|define videofile path for capture|default camera|
+| -w |seconds waited,before initiating tracking |1 |
+| -x |relative x coordinate of center point|0.5 |
+| -y |relative y coordinate of center point| 0.5|
 
 ## Example:
 

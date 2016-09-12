@@ -49,7 +49,7 @@ else:
 
 # get functions from FlumeView_analyser
 #capture = fv.set_input(args["video"])
-analyser = fv.analyser(args["video"],divide_x,divide_y,args["wait"],args["min_area"],args["timelimit"],args["refresh"],args["show"])
+analyser = fv.analyser(args["video"],args["x_value"],args["y_value"],args["wait"],args["min_area"],args["timelimit"],args["refresh"],args["show"])
 
 # new class for accepting data from analyser
 class fish_data(QObject):
@@ -69,7 +69,7 @@ class fish_data(QObject):
 
 
     def on_newData(self,x,y):
-        #global divide_x,divide_y,args
+        global divide_x,divide_y,args
 
         stats.calculate(x,y,divide_x,divide_y)
 
