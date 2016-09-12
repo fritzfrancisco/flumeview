@@ -51,7 +51,7 @@ When saving data to a file the expressions ```-d``` ,```-p``` or ```-i``` can be
 
 File name, frame count, and (relative) fish x- and y-coordinates for each frame are stored as row in a single ```.csv ``` file with the given name. However, the file is overwritten if the exact file already exists. This can be changed by exchanging the ```'w'``` for an ```'a'``` (append) in ```with open(args["dump"],'w') as csvfile:``` of the ```FlumeView_cli.py``` script. However, additional changes may be needed to ensure that the file is recognized if already present.
 
-The data when using the ```-d``` command is emitted as ```.csv ``` file in the folder in which the  ```FlumeView_cli.py ``` file is located in the following format:
+The data when using the ```-d``` command is emitted as ```.csv ``` file in the folder in which the  ```FlumeView_cli.py ``` file is located, and stored in the following format:
 
 |File|x_Coord|Y_Coord|Frame_number|
 |:---|:---|:---|:---|
