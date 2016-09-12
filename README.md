@@ -3,7 +3,7 @@ Application for analysing and tracking fish in classical choice fluming tests.
 
 ![alt text](http://www.pnas.org/content/suppl/2007/01/02/0606777104.DC1/06777Fig3.jpg "Gerlach et al. 10.1073/pnas.0606777104.")
 
-Image 1.: Choice flume with channel (2 -3) and area (3-4) positions (A & B) and arrows showing the current orientation (Gerlach et al. 10.1073/pnas.0606777104.; <http://www.pnas.org/content/104/3/858/suppl/DC1>)
+Image 1.: Choice flume with channel (2 -3) and area (3-4) positions (A & B) and arrows showing the flow orientation (Gerlach et al. 10.1073/pnas.0606777104.; <http://www.pnas.org/content/104/3/858/suppl/DC1>)
 
 The flume is set up in four compartments between which the fish can freely move and choose. Each channel can be filled with different odors or stimulants.
 
