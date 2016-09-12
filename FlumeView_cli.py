@@ -20,6 +20,8 @@ channel_A = 0
 channel_B = 0
 area_A = 0
 area_B = 0
+frame_list = []
+
 
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
@@ -32,7 +34,9 @@ ap.add_argument("-c","--click",type=bool,default=False, help="definition of cent
 ap.add_argument("-t","--timelimit",type=int,default=sys.maxint,help="define timelimit")
 ap.add_argument("-s","--show",type=bool,default=False,help="show frames")
 ap.add_argument("-r","--refresh",type=int,default=10,help="refresh every n frames")
-ap.add_argument("-p","--print",type=str,default="on",help="print data to file")
+ap.add_argument("-p","--print",type=str,default="",help="save data to given file")
+ap.add_argument("-i","--image",type=str,default="",help="save live view to given image file")
+ap.add_argument("-d","--dump",type=str,default="",help="save all data to given file")
 #ap.add_argument("-s","--shape",type=str,default="rectangle",help="shape of test arena")
 args = vars(ap.parse_args())
 print(args)
@@ -71,11 +75,17 @@ class fish_data(QObject):
             cv2.imshow("FlumeView",frame)
 
     def on_framecount(self,frame_count):
-
+    #
+    #     #self.frame_list = []
         self.frame_count = frame_count
+    #     self.frame_list.append(frame_count)
+    #     #self.frame_list [1] = max(self.frame_list)
+        #self.frame_list [0] = min(self.frame_list)
 
-    def on_newData(self,x,y):
+
+    def on_newData(self,x,y,frame_count):
         #global divide_x,divide_y,args
+        frame_list.append([x,y,frame_count])
 
         if self.count_start == True:
 
@@ -119,12 +129,12 @@ fish = fish_data(analyser)
 analyser.start()
 
 
-# Save data to file
-if args["print"] == "on":
+# Save data to file:
+if args["print"] != "":
 
-    file_exists=os.path.isfile("FlumeView_data.csv")
+    file_exists=os.path.isfile(args["print"])
 
-    with open('FlumeView_data.csv','a') as csvfile:
+    with open(args["print"],'a') as csvfile:
         dw=csv.DictWriter(csvfile,delimiter=',',fieldnames=["File","Total Time [s]","Channel_A [s]","Channel_B [s]","Area_A [s]","Area_B [s]"],lineterminator='\n')
         writer=csv.writer(csvfile)
 
@@ -134,3 +144,20 @@ if args["print"] == "on":
         else:
             dw.writeheader()
             writer.writerow([args.get("video"),"{0:.2f}".format((analyser.frame_count/analyser.fps)-args["wait"]),"{0:.2f}".format(stats.channel_A/analyser.fps),"{0:.2f}".format(stats.channel_B/analyser.fps),"{0:.2f}".format(stats.area_A/analyser.fps),"{0:.2f}".format(stats.area_B/analyser.fps)])
+
+if args["dump"] != "":
+
+    #dump_exists=os.path.isfile(args["dump"])
+
+    with open(args["dump"],'w') as csvfile:
+        dw=csv.DictWriter(csvfile,delimiter=',',fieldnames=["file","frame number","x coord","y coord"],lineterminator='\n')
+        writer=csv.writer(csvfile)
+        dw.writeheader()
+
+        for singleframe in frame_list:
+
+            writer.writerow([args.get("video"),singleframe[0],singleframe[1],singleframe[2]])
+
+if args["image"] != "":
+
+    cv2.imwrite(args["image"],analyser.lastframe)

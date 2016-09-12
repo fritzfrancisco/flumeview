@@ -47,7 +47,7 @@ def fix_point(capture):
 
 # create class "analyser" shell for further calculations
 class analyser(QObject):
-    newData = pyqtSignal(float,float,name='newData')
+    newData = pyqtSignal(float,float,int,name='newData')
     newFrame = pyqtSignal(int,name='newFrame')
     frameshape = pyqtSignal(int,int,name='frameshape')
     countSig = pyqtSignal(bool,name='countSignal')
@@ -64,6 +64,7 @@ class analyser(QObject):
         self.timelimit = timelimit
         self.refresh = refresh
         self.show = show
+        self.lastframe = None
 
     def set_input(self, videofile):
          """Get capture of video file.If not defined, return Webcam output """
@@ -95,7 +96,7 @@ class analyser(QObject):
 
             if (self.frame_count/self.fps)>self.timelimit:
 
-                capture.release()
+                self.capture.release()
                 return(-1,-1)
 
             else:
@@ -142,8 +143,9 @@ class analyser(QObject):
                 else:
                     count_start = True
 
+                    self.framecount.emit(self.frame_count)
                 self.countSig.emit(count_start)
-                self.framecount.emit(self.frame_count)
+
 
             	# loop over the contours
                 for c in cnts:
@@ -165,7 +167,7 @@ class analyser(QObject):
                         self.trace_xy.append((fish_x,fish_y))
 
                         #return(fish_x,fish_y)
-                        self.newData.emit(fish_x,fish_y)
+                        self.newData.emit(fish_x,fish_y,self.frame_count)
                         #self.height,self.width,channel = frame.shape
 
 
@@ -195,6 +197,8 @@ class analyser(QObject):
 
                     else:
                         print("Wait:"+str("{0:.2f}".format(self.frame_count/self.fps))+" s ;"+str(self.frame_count)+" frames")
+
+            self.lastframe = frame
 
             if self.show == True:
                 cv2.imshow("FlumeView - Live",frame)
