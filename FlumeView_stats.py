@@ -59,4 +59,4 @@ def calculate(x,y,divide_x,divide_y):
     if x > divide_x and y > divide_y:
               area_B += 1
 
-    print(area_A,area_B,channel_A,channel_B)
+    #print(area_A,area_B,channel_A,channel_B)

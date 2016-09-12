@@ -31,7 +31,8 @@ ap.add_argument("-w","--wait",type=int,default=1, help="seconds waited,before in
 ap.add_argument("-c","--click",type=bool,default=False, help="definition of center by clicking on first frame displayed in window")
 ap.add_argument("-t","--timelimit",type=int,default=sys.maxint,help="define timelimit")
 ap.add_argument("-s","--show",type=bool,default=False,help="show frames")
-ap.add_argument("-r","--refresh",type=int,default=1,help="refresh every n frames")
+ap.add_argument("-r","--refresh",type=int,default=10,help="refresh every n frames")
+ap.add_argument("-p","--print",type=str,default="on",help="print data to file")
 #ap.add_argument("-s","--shape",type=str,default="rectangle",help="shape of test arena")
 args = vars(ap.parse_args())
 print(args)
@@ -49,7 +50,7 @@ else:
 
 # get functions from FlumeView_analyser
 #capture = fv.set_input(args["video"])
-analyser = fv.analyser(args["video"],args["x_value"],args["y_value"],args["wait"],args["min_area"],args["timelimit"],args["refresh"],args["show"])
+analyser = fv.analyser(args["video"],divide_x,divide_y,args["wait"],args["min_area"],args["timelimit"],args["refresh"],args["show"])
 
 # new class for accepting data from analyser
 class fish_data(QObject):
@@ -58,6 +59,8 @@ class fish_data(QObject):
         QObject.__init__(self)
         analyser.newData.connect(self.on_newData)
         analyser.newFrame.connect(self.on_newFrame)
+        analyser.countSig.connect(self.on_countSig)
+        analyser.framecount.connect(self.on_framecount)
         #analyser.newData.connect(self.on_calculate)
 
 # Not quite shure about this yet. Implementation to integrate video output option with args["show"]
@@ -67,15 +70,37 @@ class fish_data(QObject):
             cv2.namedWindow("FlumeView")
             cv2.imshow("FlumeView",frame)
 
+    def on_framecount(self,frame_count):
+
+        self.frame_count = frame_count
 
     def on_newData(self,x,y):
-        global divide_x,divide_y,args
+        #global divide_x,divide_y,args
 
-        stats.calculate(x,y,divide_x,divide_y)
+        if self.count_start == True:
+
+            stats.calculate(x,y,divide_x,divide_y)
 
         if args["refresh"] > 0 and args["show"] == True:
 
             stats.plot_xy(x,y,args["refresh"])
+
+        #print data
+        print("Total Time [s]:	"+"{0:.2f}".format(self.frame_count/analyser.fps - args["wait"]))
+        print("Channel_A [s]:	"+"{0:.2f}".format(stats.channel_A/analyser.fps))
+        print("Channel_B [s]:	"+"{0:.2f}".format(stats.channel_B/analyser.fps))
+        print("Area_A [s]:	"+"{0:.2f}".format(stats.area_A/analyser.fps))
+        print("Area_B [s]:	"+"{0:.2f}".format(stats.area_B/analyser.fps))
+
+        # Print data to file (data.csv)
+        # Write file and header if file does not already exist
+        # If file exists data is inserted in a new row and no header is added
+        # lineterminator = '\n' to remove blank line between rows when program is restarted
+
+
+    def on_countSig(self,count_start):
+
+        self.count_start = count_start
 
     # def on_calculate(self,x,y):
     #     global divide_x,divide_y
@@ -92,5 +117,20 @@ class fish_data(QObject):
 fish = fish_data(analyser)
 
 analyser.start()
-#
-# analyser.euclideanDist()
+
+
+# Save data to file
+if args["print"] == "on":
+
+    file_exists=os.path.isfile("FlumeView_data.csv")
+
+    with open('FlumeView_data.csv','a') as csvfile:
+        dw=csv.DictWriter(csvfile,delimiter=',',fieldnames=["File","Total Time [s]","Channel_A [s]","Channel_B [s]","Area_A [s]","Area_B [s]"],lineterminator='\n')
+        writer=csv.writer(csvfile)
+
+        if file_exists == True:
+            writer.writerow([args.get("video"),"{0:.2f}".format((analyser.frame_count/analyser.fps) - args["wait"]),"{0:.2f}".format(stats.channel_A/analyser.fps),"{0:.2f}".format(stats.channel_B/analyser.fps),"{0:.2f}".format(stats.area_A/analyser.fps),"{0:.2f}".format(stats.area_B/analyser.fps)])
+
+        else:
+            dw.writeheader()
+            writer.writerow([args.get("video"),"{0:.2f}".format((analyser.frame_count/analyser.fps)-args["wait"]),"{0:.2f}".format(stats.channel_A/analyser.fps),"{0:.2f}".format(stats.channel_B/analyser.fps),"{0:.2f}".format(stats.area_A/analyser.fps),"{0:.2f}".format(stats.area_B/analyser.fps)])

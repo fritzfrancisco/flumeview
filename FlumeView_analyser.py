@@ -49,7 +49,9 @@ def fix_point(capture):
 class analyser(QObject):
     newData = pyqtSignal(float,float,name='newData')
     newFrame = pyqtSignal(int,name='newFrame')
-    frameshape = pyqtSignal(int,int,name="frameshape")
+    frameshape = pyqtSignal(int,int,name='frameshape')
+    countSig = pyqtSignal(bool,name='countSignal')
+    framecount = pyqtSignal(int,name='framecount')
 
     def __init__(self,videofile,x,y,wait,min_area,timelimit,refresh,show):
         QObject.__init__(self)
@@ -80,8 +82,8 @@ class analyser(QObject):
 
         self.fps = self.capture.get(cv2.cv.CV_CAP_PROP_FPS)
 
-        frame_count = 0
-
+        self.frame_count = 0
+        self.count_start = bool
         self.trace_xy = []
         self.dist = []
         #self.firstFrame = None
@@ -91,7 +93,7 @@ class analyser(QObject):
 
         while True:
 
-            if (frame_count/self.fps)>self.timelimit:
+            if (self.frame_count/self.fps)>self.timelimit:
 
                 capture.release()
                 return(-1,-1)
@@ -117,11 +119,11 @@ class analyser(QObject):
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 gray = cv2.GaussianBlur(gray, (21, 21), 0)
 
+                #if self.firstFrame is None:
                 if self.firstFrame == None:
                     self.firstFrame = gray
 
-                #if self.firstFrame is None:
-                frame_count += 1
+                self.frame_count += 1
 
             	# compute the absolute difference between the current frame and
             	# first frame
@@ -133,56 +135,66 @@ class analyser(QObject):
                 thresh = cv2.dilate(thresh, None, iterations=2)
                 (cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
+
+                if (self.frame_count/self.fps)<self.wait:
+                    count_start = False
+
+                else:
+                    count_start = True
+
+                self.countSig.emit(count_start)
+                self.framecount.emit(self.frame_count)
+
             	# loop over the contours
                 for c in cnts:
             		# if the contour is too small, ignore it
                     if cv2.contourArea(c) < self.min_area:
                         continue
 
-            		# compute the bounding box for the contour, draw it on the frame,
-            		# and update the text
-                    (x, y, w, h) = cv2.boundingRect(c)
-                    cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-                    cv2.line(frame,(0,int(self.divide_y*height)),(width,int(self.divide_y*height)),(255,0,0))
-                    cv2.line(frame,(int(width*self.divide_x),0),(int(width*self.divide_x),height),(255,0,0))
+                    if count_start == True:
+                        # compute the bounding box for the contour, draw it on the frame,
+            		    # and update the text
+                        (x, y, w, h) = cv2.boundingRect(c)
+                        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                        cv2.line(frame,(0,int(self.divide_y*height)),(width,int(self.divide_y*height)),(255,0,0))
+                        cv2.line(frame,(int(width*self.divide_x),0),(int(width*self.divide_x),height),(255,0,0))
 
-                    for i,element in enumerate(self.trace_xy):
-                        if i > 0:
-                            element = (int(element[0]*width),int(element[1]*height))
-                            previous_element = self.trace_xy[i-1]
-                            previous_element = (int(previous_element[0]*width),int(previous_element[1]*height))
+                        fish_x = float(x+w/2) / float(width)
+                        fish_y = float(y+h/2) / float(height)
+
+                        self.trace_xy.append((fish_x,fish_y))
+
+                        #return(fish_x,fish_y)
+                        self.newData.emit(fish_x,fish_y)
+                        #self.height,self.width,channel = frame.shape
 
 
-                            # Calculating euclidean distance between points:
-                            dist_euclidean = np.linalg.norm(np.array(previous_element)-np.array(element))
-                            self.dist.append(dist_euclidean)
-                            self.dist = self.dist[-5:]
-                            #dist_mean = cv2.mean(np.array(self.dist))
-                            dist_mean = np.mean(self.dist)
-                            #print(self.dist_mean[0])
+                        for i,element in enumerate(self.trace_xy):
+                            if i > 0:
+                                element = (int(element[0]*width),int(element[1]*height))
+                                previous_element = self.trace_xy[i-1]
+                                previous_element = (int(previous_element[0]*width),int(previous_element[1]*height))
 
-                            #cv2.line(frame,element,previous_element,(125, 20,200),2)
-                            #text = "Occupied"
+                                # Calculating euclidean distance between points:
+                                dist_euclidean = np.linalg.norm(np.array(previous_element)-np.array(element))
+                                self.dist.append(dist_euclidean)
+                                self.dist = self.dist[-5:]
+                                #dist_mean = cv2.mean(np.array(self.dist))
+                                dist_mean = np.mean(self.dist)
+                                #print(self.dist_mean[0])
 
-                            if dist_euclidean < dist_mean*2:
+                                #cv2.line(frame,element,previous_element,(125, 20,200),2)
+                                #text = "Occupied"
 
-                                cv2.line(frame,element,previous_element,((frame_count),0,frame_count-2),2)
+                                #if dist_euclidean < dist_mean*2:
+
+                                cv2.line(frame,element,previous_element,((self.frame_count),0,self.frame_count-2),2)
                                 #cv2.line(frame,element,previous_element,(125,20,200),2)
-                                #print(frame_count)
 
-                    fish_x = float(x+w/2) / float(width)
-                    fish_y = float(y+h/2) / float(height)
-                    # area_A = 0
-                    # area_B = 0
-                    # channel_A = 0
-                    # channel_B = 0
 
-                    self.trace_xy.append((fish_x,fish_y))
 
-                    #return(fish_x,fish_y)
-                    self.newData.emit(fish_x,fish_y)
-
-                    self.height,self.width,channel = frame.shape
+                    else:
+                        print("Wait:"+str("{0:.2f}".format(self.frame_count/self.fps))+" s ;"+str(self.frame_count)+" frames")
 
             if self.show == True:
                 cv2.imshow("FlumeView - Live",frame)
