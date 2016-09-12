@@ -7,11 +7,11 @@ Image 1.: Choice flume with channel (2 -3) and area (3-4) positions (A & B) and 
 
 The flume is set up in four compartments between which the fish can freely move and choose. Each channel can be filled with different odors or stimulants.
 
-<img src="https://github.com/fritzfrancisco/flumeview/blob/master/screenshot_live.png " width="400">
+<img src="https://github.com/fritzfrancisco/flumeview/blob/master/screenshot_live.png " width="400" align = "center">
 
 Image 2.: Screenshot: Live View
 
-<img src="https://github.com/fritzfrancisco/flumeview/blob/master/screenshot_plot.png " width="400">
+<img src="https://github.com/fritzfrancisco/flumeview/blob/master/screenshot_plot.png " width="400" align = "center">
 
 Image 3.: Screenshot: Plot
 
