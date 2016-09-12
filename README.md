@@ -7,10 +7,10 @@ Image 1.: Choice flume with channel (2 -3) and area (3-4) positions (A & B) and 
 
 The flume is set up in four compartments between which the fish can freely move and choose. Each channel can be filled with different odors or stimulants.
 
-![alt text](https://github.com/fritzfrancisco/flumeview/blob/master/screenshot_live.png "Screenshot: live view")
+![](https://github.com/fritzfrancisco/flumeview/blob/master/screenshot_live.png "Screenshot: live view")
 Sceenshot: Live view
 
-![alt text](https://github.com/fritzfrancisco/flumeview/blob/master/screenshot_plot.png "Screenshot: plot")
+![](https://github.com/fritzfrancisco/flumeview/blob/master/screenshot_plot.png "Screenshot: plot")
 Screenshot: Plot
 
 FlumeView is divided up into a command line interface which manages the external commands, the analyser which analyses the tracking data and the stats file which manages all calculations.
