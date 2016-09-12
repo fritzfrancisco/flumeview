@@ -7,11 +7,13 @@ Image 1.: Choice flume with channel (2 -3) and area (3-4) positions (A & B) and 
 
 The flume is set up in four compartments between which the fish can freely move and choose. Each channel can be filled with different odors or stimulants.
 
-![](https://github.com/fritzfrancisco/flumeview/blob/master/screenshot_live.png "Screenshot: live view")
-Sceenshot: Live view
+<img src="https://github.com/fritzfrancisco/flumeview/blob/master/screenshot_live.png " width="48">
 
-![](https://github.com/fritzfrancisco/flumeview/blob/master/screenshot_plot.png "Screenshot: plot")
-Screenshot: Plot
+Image 2.: Screenshot: Live View
+
+<img src="https://github.com/fritzfrancisco/flumeview/blob/master/screenshot_plot.png " width="48">
+
+Image 3.: Screenshot: Plot
 
 FlumeView is divided up into a command line interface which manages the external commands, the analyser which analyses the tracking data and the stats file which manages all calculations.
 
@@ -32,7 +34,7 @@ FlumeView is divided up into a command line interface which manages the external
 ## Commandline Example:
 
 ```bash
-python2 FlumeView_cli.py -v D.rerio_test_wf1.dvd -s True -c True -r 100
+python2 FlumeView_cli.py -v D.rerio_test_wf1.dvd -s True -c True -r 100 -w 5
 ```
 
 ## Data Output
