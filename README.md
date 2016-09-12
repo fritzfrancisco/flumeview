@@ -53,7 +53,7 @@ File name, frame count, and (relative) fish x- and y-coordinates for each frame 
 
 The data when using the ```-d``` command is emitted as ```.csv ``` file in the folder in which the  ```FlumeView_cli.py ``` file is located in the following format:
 
-|File|x_Coord|Y_Coord|Frame_number||
+|File|x_Coord|Y_Coord|Frame_number|
 |:---|:---|:---|:---|
 |D.rerio_test_wf1.dvd|0.61|0.6636636636636637|90|
 |D.rerio_test_wf1.dvd|0.61|0.6606606606606606|91|
