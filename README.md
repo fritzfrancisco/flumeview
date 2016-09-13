@@ -17,6 +17,21 @@ Image 3.: Screenshot: Plot
 
 FlumeView is divided up into a command line interface which manages the external commands, the analyser which analyses the tracking data and the stats file which manages all calculations.
 
+## Installation
+
+In order to run FlumeView install the following depencies:
+
+|Dependecies|Version |
+|:---|:---|
+|Python| 2.7.6|
+|OpenCV|2.4.8|
+|PyQt| 4.8.6|
+|imutils|0.3.3|
+|numpy|1.8.2|
+|matplotlib|1.3.1|
+
+## Usage
+
 |Argument       | Use           |Default |
 |:-------------: |:-------------| :-----|
 |-a | minimum area size of tracked blob|100 |

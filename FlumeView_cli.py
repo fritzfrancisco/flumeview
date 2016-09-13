@@ -7,6 +7,7 @@ import time
 import csv
 import cv2
 import os.path
+import datetime
 import FlumeView_analyser as fv
 import FlumeView_stats as stats
 # import matplotlib.pyplot as plt
@@ -130,6 +131,19 @@ analyser.start()
 
 
 # Save data to file:
+# timestamp_exists=os.path.isfile("FV_argument_timestamp.csv")
+#
+# with open("FV_argument_timestamp.csv",'a') as csvfile:
+#     dw=csv.DictWriter(csvfile,delimiter=',',fieldnames=["datatime","videofile","x-coord","y-coord","min_area","click","dump","image","print","refresh","show frame","timelimit","wait"],lineterminator='\n')
+#     writer=csv.writer(csvfile)
+#
+#     if timestamp_exists == True:
+#         writer.writerow([datetime.datetime.now(),args.get("video"),args["divide_x"],args["divide_y"],args["min_area"],args["click"],args["dump"],args["image"],args["print"],args["refresh"],args["show"],args["timelimit"],args["wait"]])
+#
+#     else:
+#         dw.writeheader()
+#         writer.writerow(datetime.datetime.now(),[args.get("video"),args["divide_x"],args["divide_y"],args["min_area"],args["click"],args["dump"],args["image"],args["print"],args["refresh"],args["show"],args["timelimit"],args["wait"]])
+
 if args["print"] != "":
 
     file_exists=os.path.isfile(args["print"])
