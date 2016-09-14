@@ -1,3 +1,4 @@
+
 import argparse
 import datetime
 import imutils
@@ -20,7 +21,7 @@ def divide_frame(event,x,y,flags,param):
 
 def set_input(videofile):
      """Get capture of video file.If not defined, return Webcam output """
-     # if the video argument is None,ergewaltigungs then we are reading from webcam
+     # if the video argument is None, then we are reading from webcam
      if videofile is None:
         return cv2.VideoCapture(0)
         time.sleep(0.25)

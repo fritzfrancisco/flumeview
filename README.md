@@ -19,10 +19,10 @@ FlumeView is divided up into a command line interface which manages the external
 
 ## Installation
 
-In order to run FlumeView install the following depencies:
+In order to run FlumeView install the following dependencies:
 
-|Dependecies|Version |
-|:---|:---|
+|Dependencies|Version |
+|:---|:---:|
 |Python| 2.7.6|
 |OpenCV|2.4.8|
 |PyQt| 4.8.6|
@@ -43,7 +43,7 @@ In order to run FlumeView install the following depencies:
 | -s| show frame| False|
 |-t |define timelimit | sys.maxint|
 |-v|define videofile path for capture|default camera|
-| -w |seconds waited,before initiating tracking |1 |
+| -w |seconds waited,before initiating tracking |0|
 | -x |relative x coordinate of center point|0.5 |
 | -y |relative y coordinate of center point| 0.5|
 
