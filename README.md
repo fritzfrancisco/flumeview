@@ -32,6 +32,12 @@ In order to run FlumeView install the following dependencies:
 
 ## Usage
 
+In order to use FlumeView (command line interface) navigate to the containing folder and execute
+```bash
+python FlumeView_cli.py
+```
+followed by the additional arguments for specification:
+
 |Argument       | Use           |Default |
 |:-------------: |:-------------| :-----|
 |-a | minimum area size of tracked blob|100 |
@@ -47,12 +53,15 @@ In order to run FlumeView install the following dependencies:
 | -x |relative x coordinate of center point|0.5 |
 | -y |relative y coordinate of center point| 0.5|
 
-
-## Commandline Example:
+### Commandline Example:
 
 ```bash
 python2 FlumeView_cli.py -v D.rerio_test_wf1.dvd -s True -c True -r 100 -w 5 -t 10 -d D_test_data
 ```
+
+If no argument is given the software should revert to the ```cv2.VideoCapture(0)```, which in most cases is the integrated webcam.
+
+However, the further functions are not yet incorporated for webcam usage in the current version.
 
 ## Data Input
 The library used in this application is based on the open source project OpenCv  (<http://opencv.org/>) which is a powerful video and image computation platform. Therefore, FlumeView directly supports most common video extensions.

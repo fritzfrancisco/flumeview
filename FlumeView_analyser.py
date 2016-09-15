@@ -14,7 +14,7 @@ xyreturn = None
 
 def divide_frame(event,x,y,flags,param):
     global xyreturn
-    if event == cv2.EVENT_LBUTTONDOWN:
+    if event == cv2.EVENT_LBUTTONDOWN and cv2.EVENT_LBUTTONUP:
         xyreturn = (x,y)
         #divide_x = x
         #divide_y = y
