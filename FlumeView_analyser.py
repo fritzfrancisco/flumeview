@@ -1,4 +1,3 @@
-
 import argparse
 import datetime
 import imutils
@@ -7,17 +6,41 @@ import time
 import csv
 import cv2
 import os.path
+import math
 
 from PyQt4.QtCore import QObject, pyqtSignal, pyqtSlot
 
 xyreturn = None
+switch = 0
+crp_lst = []
+p1 = (0,0)
+p2 = (1,1)
+geo = 0
 
 def divide_frame(event,x,y,flags,param):
-    global xyreturn
-    if event == cv2.EVENT_LBUTTONDOWN and cv2.EVENT_LBUTTONUP:
+    global xyreturn, switch, crp_lst, geo
+
+    if event == cv2.EVENT_LBUTTONDOWN:
+        switch = 1
+        crp_lst = [(x,y)]
+
+    elif event == cv2.EVENT_LBUTTONUP:
+        switch = 0
+        crp_lst.append((x,y))
+
+    if event == cv2.EVENT_LBUTTONDBLCLK:
         xyreturn = (x,y)
-        #divide_x = x
-        #divide_y = y
+
+    if event == cv2.EVENT_MOUSEMOVE and switch == 1:
+        crp_lst.append((x,y))
+
+    # if event == cv2.EVENT_RBUTTONDOWN:
+    #     if geo == 0:
+    #         geo = 1
+    #         crp_lst = [(x,y)]
+    #     else:
+    #         geo = geo - 1
+    #         crp_lst = [(x,y)]
 
 def set_input(videofile):
      """Get capture of video file.If not defined, return Webcam output """
@@ -30,8 +53,9 @@ def set_input(videofile):
         return cv2.VideoCapture(videofile)
 
 def fix_point(capture):
-    global xyreturn
+    global xyreturn,switch,p1,p2
     (grabbed,frame) = capture.read()
+    #frame = frame[pt1y:pt2y,pt1x:pt2x]
     height,width,channel = frame.shape
     xyreturn=None
     cv2.namedWindow("FlumeView")
@@ -39,8 +63,39 @@ def fix_point(capture):
     while xyreturn == None:
 
         (grabbed,frame) = capture.read()
+        key = cv2.waitKey(30) & 0xFF
+
+        if len(crp_lst) >= 1 and geo != 1:
+
+            cv2.rectangle(frame,min(crp_lst),crp_lst[-1],(0,0,255),2)
+            # geo = 0
+
+        # if len(crp_lst) >= 1 and geo == 1:
+        #
+        #     a = ((crp_lst[-1][0]-min(crp_lst)[0])^2)/float(width)
+        #     b = ((crp_lst[-1][1]-min(crp_lst)[1])^2)/float(height)
+        #     c = math.sqrt(a+b)
+        #     r = math.hypot((crp_lst[-1][0]-min(crp_lst)[0]),(crp_lst[-1][1]-min(crp_lst)[1]))
+        #     d = 2*math.pi*r
+        #     cv2.circle(frame,min(crp_lst),int(r),(0,0,255),2)
+
+        # print(a,b,c,d,r)
+        # else:
+        #     crp_lst.append((0,0))
+        #     crp_lst.append((int(width),int(height)))
+
         cv2.imshow("FlumeView",frame)
-        cv2.waitKey(30)
+
+        if key == ord("c"):
+            p1 = min(crp_lst)[0]/float(width),min(crp_lst)[1]/float(height)
+            p2 = crp_lst[-1][0]/float(width),crp_lst[-1][1]/float(height)
+
+        #     p1 =(min(crp_lst)[0]/float(width),min(crp_lst)[1]/float(height))
+        #     p2 =(crp_lst[-1][0]/float(width),crp_lst[-1][1]/float(height))
+        # cv2.waitKey(30)
+
+        if xyreturn != None:
+            cv2.destroyWindow("FlumeView")
 
     capture.release()
     #print(xyreturn[1]/width)
@@ -50,9 +105,9 @@ def fix_point(capture):
 class analyser(QObject):
     newData = pyqtSignal(float,float,int,name='newData')
     newFrame = pyqtSignal(int,name='newFrame')
-    frameshape = pyqtSignal(int,int,name='frameshape')
     countSig = pyqtSignal(bool,name='countSignal')
     framecount = pyqtSignal(int,name='framecount')
+    #frameshape = pyqtSignal(int,int,name='frameshape')
 
     def __init__(self,videofile,x,y,wait,min_area,timelimit,refresh,show):
         QObject.__init__(self)
@@ -76,7 +131,6 @@ class analyser(QObject):
 
          else:
          	return cv2.VideoCapture(videofile)
-
 
     def start(self):
 
@@ -116,8 +170,11 @@ class analyser(QObject):
 
 
             	# resize the frame, convert it to grayscale, and blur it
-                frame = imutils.resize(self.frame, width=500)
+                frame = self.frame
+                #frame = frame[pt1y:pt2y,pt1x:pt2x]
+                frame = imutils.resize(frame, width=500)
                 height, width, channels = frame.shape
+                cv2.rectangle(frame,(int(p1[0]*float(width)),int(p1[1]*float(height))),(int(p2[0]*float(width)),int(p2[1]*float(height))),(0,0,255),2)
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 gray = cv2.GaussianBlur(gray, (21, 21), 0)
 
@@ -145,7 +202,7 @@ class analyser(QObject):
                     count_start = True
 
                     self.framecount.emit(self.frame_count)
-                self.countSig.emit(count_start)
+                    self.countSig.emit(count_start)
 
 
             	# loop over the contours
@@ -158,16 +215,24 @@ class analyser(QObject):
                         # compute the bounding box for the contour, draw it on the frame,
             		    # and update the text
                         (x, y, w, h) = cv2.boundingRect(c)
-                        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-                        cv2.line(frame,(0,int(self.divide_y*height)),(width,int(self.divide_y*height)),(255,0,0))
-                        cv2.line(frame,(int(width*self.divide_x),0),(int(width*self.divide_x),height),(255,0,0))
+                        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 1)
+
+                        if p2[0] >= self.divide_x >= p1[0]:
+                            cv2.line(frame,(int(width*self.divide_x),int(p1[1]*height)),(int(width*self.divide_x),int(p2[1]*height)),(255,0,0))
+                        else:
+                            print("ERROR: Center divide outside of bounding area")
+
+                        if p2[1] >= self.divide_y >= p1[1]:
+                            cv2.line(frame,(int(p1[0]*width),int(self.divide_y*height)),(int(p2[0]*width),int(self.divide_y*height)),(255,0,0))
+                        else:
+                            print("ERROR: Center divide outside of bounding area")
+
 
                         fish_x = float(x+w/2) / float(width)
                         fish_y = float(y+h/2) / float(height)
 
+                        # if (float(pt1x)/float(width))<fish_x<(float(pt2x)/float(width)) and (float(pt1y)/float(height))<fish_y<(float(pt2y)/float(height)):
                         self.trace_xy.append((fish_x,fish_y))
-
-                        #return(fish_x,fish_y)
                         self.newData.emit(fish_x,fish_y,self.frame_count)
                         #self.height,self.width,channel = frame.shape
 
@@ -191,8 +256,10 @@ class analyser(QObject):
 
                                 #if dist_euclidean < dist_mean*2:
 
-                                cv2.line(frame,element,previous_element,((self.frame_count),0,self.frame_count-2),2)
+                                #cv2.line(frame,element,previous_element,((self.frame_count),0,self.frame_count-2),2)
+                                cv2.line(frame,element,previous_element,(0,255,0),2)
                                 #cv2.line(frame,element,previous_element,(125,20,200),2)
+                                #cv2.circle(frame,element,1,(self.frame_count,255,0),1)
 
 
 

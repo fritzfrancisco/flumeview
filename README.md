@@ -41,7 +41,7 @@ followed by the additional arguments for specification:
 |Argument       | Use           |Default |
 |:-------------: |:-------------| :-----|
 |-a | minimum area size of tracked blob|100 |
-|-c |definition of center of four test chambers by clicking on first frame displayed in a separate window | False|
+|-c |definition of center of four test chambers by double-clicking on first frame displayed in a separate window | False|
 |-d|save frame number, x- and y-coordinates to given file |no default|
 |-i|save live view tracking image to given file|no default|
 |-p| save combined data to given file| no default|
@@ -52,6 +52,10 @@ followed by the additional arguments for specification:
 | -w |seconds waited,before initiating tracking |0|
 | -x |relative x coordinate of center point|0.5 |
 | -y |relative y coordinate of center point| 0.5|
+
+When the left mouse button is held down a rectangular frame can be created, to which the area in which an object can be tracked is limited, excluding any outside movement. Once a sufficient area is chosen it can be selected by pushing the "c" (crop) key. The tracking is then initiated by double-clicking on the desired center-point within the rectangle.
+
+If no cropping  area is selected the center selection via double click is sufficient.
 
 ### Commandline Example:
 

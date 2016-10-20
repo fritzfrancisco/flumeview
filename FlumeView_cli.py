@@ -1,3 +1,4 @@
+
 import argparse
 import sys
 import datetime
@@ -23,15 +24,14 @@ area_A = 0
 area_B = 0
 frame_list = []
 
-
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument("-v", "--video", help="path to the video file")
 ap.add_argument("-a", "--min-area", type=int, default=100, help="minimum area size")
 ap.add_argument("-x","--x-value",type=float,default=0.5, help="x coordinate of center")
 ap.add_argument("-y","--y-value",type=float,default=0.5, help="y coordinate of center")
-ap.add_argument("-w","--wait",type=int,default=0, help="seconds waited,before initiation")
-ap.add_argument("-c","--click",type=bool,default=False, help="definition of center by clicking on first frame displayed in window")
+ap.add_argument("-w","--wait",type=int,default=1, help="seconds waited,before initiation")
+ap.add_argument("-c","--click",type=bool,default=False, help="definition of center by double-clicking on first frame displayed in window")
 ap.add_argument("-t","--timelimit",type=int,default=sys.maxint,help="define timelimit")
 ap.add_argument("-s","--show",type=bool,default=False,help="show frames")
 ap.add_argument("-r","--refresh",type=int,default=10,help="refresh every n frames")
@@ -66,11 +66,11 @@ class fish_data(QObject):
         analyser.newFrame.connect(self.on_newFrame)
         analyser.countSig.connect(self.on_countSig)
         analyser.framecount.connect(self.on_framecount)
+        #analyser.frameshape.connect(self.on_frameshape)
         #analyser.newData.connect(self.on_calculate)
 
 # Not quite shure about this yet. Implementation to integrate video output option with args["show"]
     def on_newFrame(self,frame):
-
         if args["show"] == True:
             cv2.namedWindow("FlumeView")
             cv2.imshow("FlumeView",frame)
@@ -83,7 +83,6 @@ class fish_data(QObject):
     #     #self.frame_list [1] = max(self.frame_list)
         #self.frame_list [0] = min(self.frame_list)
 
-
     def on_newData(self,x,y,frame_count):
         #global divide_x,divide_y,args
         frame_list.append([x,y,frame_count])
@@ -92,9 +91,9 @@ class fish_data(QObject):
 
             stats.calculate(x,y,divide_x,divide_y)
 
-        if args["refresh"] > 0 and args["show"] == True:
-
-            stats.plot_xy(x,y,args["refresh"])
+        # if args["refresh"] > 0 and args["show"] == True:
+        #
+        #     stats.plot_xy(x,y,args["refresh"])
 
         #print data
         print("Total Time [s]:	"+"{0:.2f}".format(self.frame_count/analyser.fps - args["wait"]))
@@ -131,18 +130,18 @@ analyser.start()
 
 
 # Save data to file:
-# timestamp_exists=os.path.isfile("FV_argument_timestamp.csv")
+# file_exists=os.path.isfile("FV_argument_timestamp.csv")
 #
 # with open("FV_argument_timestamp.csv",'a') as csvfile:
-#     dw=csv.DictWriter(csvfile,delimiter=',',fieldnames=["datatime","videofile","x-coord","y-coord","min_area","click","dump","image","print","refresh","show frame","timelimit","wait"],lineterminator='\n')
+#     dw=csv.DictWriter(csvfile,delimiter=',',fieldnames=["videofile","x-coord","y-coord","min_area","click","dump","image","print","refresh","show frame","timelimit","wait"],lineterminator='\n')
 #     writer=csv.writer(csvfile)
 #
-#     if timestamp_exists == True:
-#         writer.writerow([datetime.datetime.now(),args.get("video"),args["divide_x"],args["divide_y"],args["min_area"],args["click"],args["dump"],args["image"],args["print"],args["refresh"],args["show"],args["timelimit"],args["wait"]])
+#     if file_exists == True:
+#         writer.writerow([args.get("video"),args["divide_x"],args["divide_y"],args["min_area"],args["click"],args["dump"],args["image"],args["print"],args["refresh"],args["show"],args["timelimit"],args["wait"]])
 #
 #     else:
 #         dw.writeheader()
-#         writer.writerow(datetime.datetime.now(),[args.get("video"),args["divide_x"],args["divide_y"],args["min_area"],args["click"],args["dump"],args["image"],args["print"],args["refresh"],args["show"],args["timelimit"],args["wait"]])
+#         writer.writerow([args.get("video"),"{0:.2f}".format((analyser.frame_count/analyser.fps)-args["wait"]),"{0:.2f}".format(stats.channel_A/analyser.fps),"{0:.2f}".format(stats.channel_B/analyser.fps),"{0:.2f}".format(stats.area_A/analyser.fps),"{0:.2f}".format(stats.area_B/analyser.fps)])
 
 if args["print"] != "":
 
