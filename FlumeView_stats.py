@@ -9,6 +9,8 @@ import os.path
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import FlumeView_analyser as fv
+from frigeometry import FriGeometry
+
 
 from PyQt4.QtCore import QObject, pyqtSignal, pyqtSlot
 

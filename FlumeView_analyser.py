@@ -9,13 +9,19 @@ import os.path
 import math
 
 from PyQt4.QtCore import QObject, pyqtSignal, pyqtSlot
+from frigeometry import FriGeometry
+from frirect import FriRect
+from fricirc import FriCirc
 
 xyreturn = None
 switch = 0
 crp_lst = []
-p1 = (0,0)
+p1,center = (0,0)
 p2 = (1,1)
-geo = 0
+geo,r = 0,0
+
+circ = FriCirc(center,r)
+rect = FriRect(p1,p2)
 
 def divide_frame(event,x,y,flags,param):
     global xyreturn, switch, crp_lst, geo
@@ -34,13 +40,13 @@ def divide_frame(event,x,y,flags,param):
     if event == cv2.EVENT_MOUSEMOVE and switch == 1:
         crp_lst.append((x,y))
 
-    # if event == cv2.EVENT_RBUTTONDOWN:
-    #     if geo == 0:
-    #         geo = 1
-    #         crp_lst = [(x,y)]
-    #     else:
-    #         geo = geo - 1
-    #         crp_lst = [(x,y)]
+    if event == cv2.EVENT_RBUTTONDOWN:
+        if geo == 0:
+            geo = 1
+            crp_lst = [(x,y)]
+        else:
+            geo = geo - 1
+            crp_lst = [(x,y)]
 
 def set_input(videofile):
      """Get capture of video file.If not defined, return Webcam output """
@@ -53,7 +59,7 @@ def set_input(videofile):
         return cv2.VideoCapture(videofile)
 
 def fix_point(capture):
-    global xyreturn,switch,p1,p2
+    global xyreturn,switch,p1,p2,geo,a,b,r,center
     (grabbed,frame) = capture.read()
     #frame = frame[pt1y:pt2y,pt1x:pt2x]
     height,width,channel = frame.shape
@@ -70,16 +76,13 @@ def fix_point(capture):
             cv2.rectangle(frame,min(crp_lst),crp_lst[-1],(0,0,255),2)
             # geo = 0
 
-        # if len(crp_lst) >= 1 and geo == 1:
-        #
-        #     a = ((crp_lst[-1][0]-min(crp_lst)[0])^2)/float(width)
-        #     b = ((crp_lst[-1][1]-min(crp_lst)[1])^2)/float(height)
-        #     c = math.sqrt(a+b)
-        #     r = math.hypot((crp_lst[-1][0]-min(crp_lst)[0]),(crp_lst[-1][1]-min(crp_lst)[1]))
-        #     d = 2*math.pi*r
-        #     cv2.circle(frame,min(crp_lst),int(r),(0,0,255),2)
+        if len(crp_lst) >= 1 and geo == 1:
 
-        # print(a,b,c,d,r)
+            r = math.hypot((crp_lst[-1][0]-min(crp_lst)[0]),(crp_lst[-1][1]-min(crp_lst)[1]))
+            cv2.circle(frame,min(crp_lst),int(r),(0,0,255),2)
+        #
+        #     print(a,b,c,d,r)
+        #
         # else:
         #     crp_lst.append((0,0))
         #     crp_lst.append((int(width),int(height)))
@@ -87,8 +90,21 @@ def fix_point(capture):
         cv2.imshow("FlumeView",frame)
 
         if key == ord("c"):
-            p1 = min(crp_lst)[0]/float(width),min(crp_lst)[1]/float(height)
-            p2 = crp_lst[-1][0]/float(width),crp_lst[-1][1]/float(height)
+
+            if len(crp_lst) >= 1 and geo != 1:
+
+                p1 = min(crp_lst)[0]/float(width),min(crp_lst)[1]/float(height)
+                p2 = crp_lst[-1][0]/float(width),crp_lst[-1][1]/float(height)
+
+            if len(crp_lst) >= 1 and geo == 1:
+
+                center = min(crp_lst)
+                a = ((crp_lst[-1][0]-min(crp_lst)[0])^2)/float(width)
+                b = ((crp_lst[-1][1]-min(crp_lst)[1])^2)/float(height)
+                r = math.sqrt(a+b)
+                # r = math.hypot((crp_lst[-1][0]-min(crp_lst)[0]),(crp_lst[-1][1]-min(crp_lst)[1]))
+                # d = 2*math.pi*
+
 
         #     p1 =(min(crp_lst)[0]/float(width),min(crp_lst)[1]/float(height))
         #     p2 =(crp_lst[-1][0]/float(width),crp_lst[-1][1]/float(height))
@@ -100,6 +116,7 @@ def fix_point(capture):
     capture.release()
     #print(xyreturn[1]/width)
     return (float(xyreturn[0])/float(width),float(xyreturn[1])/float(height))
+
 
 # create class "analyser" shell for further calculations
 class analyser(QObject):
@@ -174,7 +191,12 @@ class analyser(QObject):
                 #frame = frame[pt1y:pt2y,pt1x:pt2x]
                 frame = imutils.resize(frame, width=500)
                 height, width, channels = frame.shape
-                cv2.rectangle(frame,(int(p1[0]*float(width)),int(p1[1]*float(height))),(int(p2[0]*float(width)),int(p2[1]*float(height))),(0,0,255),2)
+
+                if geo == 0:
+                    cv2.rectangle(frame,(int(p1[0]*float(width)),int(p1[1]*float(height))),(int(p2[0]*float(width)),int(p2[1]*float(height))),(0,0,255),2)
+                else:
+                    cv2.circle(frame,(int(center[0]),int(center[1])),10,(0,0,255),2)
+
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 gray = cv2.GaussianBlur(gray, (21, 21), 0)
 
@@ -217,15 +239,25 @@ class analyser(QObject):
                         (x, y, w, h) = cv2.boundingRect(c)
                         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 1)
 
-                        if p2[0] >= self.divide_x >= p1[0]:
-                            cv2.line(frame,(int(width*self.divide_x),int(p1[1]*height)),(int(width*self.divide_x),int(p2[1]*height)),(255,0,0))
-                        else:
-                            print("ERROR: Center divide outside of bounding area")
+                        # Rectangle
+                        if geo == 0:
 
-                        if p2[1] >= self.divide_y >= p1[1]:
-                            cv2.line(frame,(int(p1[0]*width),int(self.divide_y*height)),(int(p2[0]*width),int(self.divide_y*height)),(255,0,0))
-                        else:
-                            print("ERROR: Center divide outside of bounding area")
+                            if p2[0] >= self.divide_x >= p1[0]:
+                                cv2.line(frame,(int(width*self.divide_x),int(p1[1]*height)),(int(width*self.divide_x),int(p2[1]*height)),(255,0,0))
+                            else:
+                                print("ERROR: Center divide outside of bounding area")
+
+                            if p2[1] >= self.divide_y >= p1[1]:
+                                cv2.line(frame,(int(p1[0]*width),int(self.divide_y*height)),(int(p2[0]*width),int(self.divide_y*height)),(255,0,0))
+                            else:
+                                print("ERROR: Center divide outside of bounding area")
+
+                        # Circle
+                        if geo != 0:
+                            if (math.pow((self.divide_x - center[0]),2) + math.pow((self.divide_y - center[1]),2)) < math.pow(r,2):
+                                cv2.line(frame,(int(width*self.divide_x),int(center[1]*height)),(int(width*self.divide_x),int((center[1]+r)*height)),(255,0,0))
+                            else:
+                                print("ERROR: Center divide outside of bounding area")
 
 
                         fish_x = float(x+w/2) / float(width)
@@ -235,7 +267,6 @@ class analyser(QObject):
                         self.trace_xy.append((fish_x,fish_y))
                         self.newData.emit(fish_x,fish_y,self.frame_count)
                         #self.height,self.width,channel = frame.shape
-
 
                         for i,element in enumerate(self.trace_xy):
                             if i > 0:
@@ -262,7 +293,6 @@ class analyser(QObject):
                                 #cv2.circle(frame,element,1,(self.frame_count,255,0),1)
 
 
-
                     else:
                         print("Wait:"+str("{0:.2f}".format(self.frame_count/self.fps))+" s ;"+str(self.frame_count)+" frames")
 
@@ -271,7 +301,6 @@ class analyser(QObject):
             if self.show == True:
                 cv2.imshow("FlumeView - Live",frame)
                 cv2.waitKey(25)
-
 
             #matplotlib
 
