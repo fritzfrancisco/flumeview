@@ -7,7 +7,7 @@ class FriCirc(FriGeometry):
 
     def within(self,point):
         #bla bla liegt der point im circle?
-        return (point['x'] - self.center['x'])^2 + (point['y'] - self.center['y'])**2 < self.radius**2
+        return (point[0] - self.center[0])**2 + (point[1] - self.center[1])**2 < self.radius**2
 
     def drawShape(self,onFrame):
 

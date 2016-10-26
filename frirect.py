@@ -8,7 +8,7 @@ class FriRect(FriGeometry):
 
     def within(self,point):
 
-        return (p2[0]>=point['x']>=p1[0] and p2[1]>=point['y']>=p1[1])
+        return (self.p2[0]>=point[0]>=self.p1[0] and self.p2[1]>=point[1]>=self.p1[1])
 
     def drawShape(self,onFrame):
         #draw operations bla bla
