@@ -20,6 +20,8 @@ p1,center = (0,0)
 p2 = (1,1)
 geo,r = 0,0
 
+geometryObject = FriGeometry()
+
 def divide_frame(event,x,y,flags,param):
     global xyreturn, switch, crp_lst, geo
 
@@ -45,12 +47,14 @@ def divide_frame(event,x,y,flags,param):
             geo = geo - 1
             crp_lst = [(x,y)]
 
-if geo == 1:
-    #selected circle
-    geometryObject = FriCirc(center,r)
-else:
-    #selected recangle obviously
-    geometryObject = FriRect(p1,p2)
+    if geo == 1:
+        #selected circle
+        geometryObject = FriCirc(center,r)
+
+    else:
+        #selected recangle obviously
+        geometryObject = FriRect(p1,p2)
+
 
 def set_input(videofile):
      """Get capture of video file.If not defined, return Webcam output """
@@ -267,7 +271,8 @@ class analyser(QObject):
                         fish_x = float(x+w/2) / float(width)
                         fish_y = float(y+h/2) / float(height)
 
-                        # FriGeometry.within(circ,fish_x,fish_y)
+                        if geometryObject.within(x,y) == True:
+                            print("yes")
 
                         # if (float(pt1x)/float(width))<fish_x<(float(pt2x)/float(width)) and (float(pt1y)/float(height))<fish_y<(float(pt2y)/float(height)):
                         self.trace_xy.append((fish_x,fish_y))
