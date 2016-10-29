@@ -54,21 +54,21 @@ def calculate(x,y,divide_x,divide_y):
 
         counter = counter + 1
 
-        if fv.geo ==0:
+        # if fv.geo ==0:
 
-            # if fv.p1[0]<x<fv.p2[0] and fv.p1[1]<y<fv.p2[1] or fv.p1 == (0,0) and fv.p2 == (0,0):
+        # if fv.p1[0]<x<fv.p2[0] and fv.p1[1]<y<fv.p2[1] or fv.p1 == (0,0) and fv.p2 == (0,0):
 
-            if x < divide_x and y < divide_y:
-                      channel_A += 1
-            if x > divide_x and y < divide_y:
-                      area_A += 1
-            if x < divide_x and y > divide_y:
-                      channel_B += 1
-            if x > divide_x and y > divide_y:
-                      area_B += 1
+        if x < divide_x and y < divide_y:
+                  channel_A += 1
+        if x > divide_x and y < divide_y:
+                  area_A += 1
+        if x < divide_x and y > divide_y:
+                  channel_B += 1
+        if x > divide_x and y > divide_y:
+                  area_B += 1
 
-            #print(area_A,area_B,channel_A,channel_B)
+        #print(area_A,area_B,channel_A,channel_B)
 
-        else:
+    else:
 
-            return
+        return

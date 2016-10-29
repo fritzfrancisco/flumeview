@@ -16,10 +16,12 @@ from fricirc import FriCirc
 xyreturn = None
 switch = 0
 crp_lst = []
-p1,center = (0,0)
+p1 = (0,0)
+center = (0,0)
 p2 = (1,1)
 geo = 0
 r = 0
+fin_r = 0
 
 geometryObject = FriGeometry()
 
@@ -86,9 +88,7 @@ def fix_point(capture):
             # geo = 0
 
         if len(crp_lst) >= 1 and geo == 1:
-
-            r = math.hypot((crp_lst[-1][0]-min(crp_lst)[0]),(crp_lst[-1][1]-min(crp_lst)[1]))
-            cv2.circle(frame,min(crp_lst),int(r),(0,0,255),2)
+            cv2.circle(frame,min(crp_lst),int(math.hypot((crp_lst[-1][0]-min(crp_lst)[0]),(crp_lst[-1][1]-min(crp_lst)[1]))),(0,0,255),2)
         #
         #     print(a,b,c,d,r)
         #
@@ -107,12 +107,12 @@ def fix_point(capture):
 
             if len(crp_lst) >= 1 and geo == 1:
 
-                center = min(crp_lst)
+                center = (min(crp_lst)[0]/float(width),min(crp_lst)[1]/float(height))
                 a = ((crp_lst[-1][0]-min(crp_lst)[0])^2)/float(width)
                 b = ((crp_lst[-1][1]-min(crp_lst)[1])^2)/float(height)
                 # r = math.sqrt(a+b)
-                r = int(math.hypot((crp_lst[-1][0]-min(crp_lst)[0]),(crp_lst[-1][1]-min(crp_lst)[1])))
-                print(type(r))
+                # r = int(math.hypot((crp_lst[-1][0]-center[0]*float(width)),(crp_lst[-1][1]-center[1]*float(height))))
+                r = (math.hypot((crp_lst[-1][0]/float(width)-center[0]),(crp_lst[-1][1]/float(height)-center[1])))
         #     p1 =(min(crp_lst)[0]/float(width),min(crp_lst)[1]/float(height))
         #     p2 =(crp_lst[-1][0]/float(width),crp_lst[-1][1]/float(height))
         # cv2.waitKey(30)
@@ -203,7 +203,7 @@ class analyser(QObject):
                     # geometryObject.drawShape()
                     cv2.rectangle(frame,(int(p1[0]*float(width)),int(p1[1]*float(height))),(int(p2[0]*float(width)),int(p2[1]*float(height))),(0,0,255),2)
                 else:
-                    cv2.circle(frame,(int(center[0]),int(center[1])),r,(0,0,255),2)
+                    cv2.circle(frame,(int(center[0]*float(width)),int(center[1]*float(height))),int(r*width),(0,0,255),2)
 
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 gray = cv2.GaussianBlur(gray, (21, 21), 0)
@@ -270,8 +270,6 @@ class analyser(QObject):
 
                         fish_x = float(x+w/2) / float(width)
                         fish_y = float(y+h/2) / float(height)
-
-                        # geometryObject.within([x,y]))
 
                         # if (float(pt1x)/float(width))<fish_x<(float(pt2x)/float(width)) and (float(pt1y)/float(height))<fish_y<(float(pt2y)/float(height)):
                         self.trace_xy.append((fish_x,fish_y))
