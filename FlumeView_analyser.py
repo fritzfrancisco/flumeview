@@ -17,11 +17,10 @@ xyreturn = None
 switch = 0
 crp_lst = []
 p1 = (0,0)
-center = (0,0)
 p2 = (1,1)
 geo = 0
 r = 0
-fin_r = 0
+
 
 geometryObject = FriGeometry()
 
@@ -52,7 +51,7 @@ def divide_frame(event,x,y,flags,param):
 
     if geo == 1:
         #selected circle
-        geometryObject = FriCirc(center,r)
+        geometryObject = FriCirc(p1,r)
 
     else:
         #selected recangle obviously
@@ -70,7 +69,7 @@ def set_input(videofile):
         return cv2.VideoCapture(videofile)
 
 def fix_point(capture):
-    global xyreturn,switch,p1,p2,geo,a,b,r,center
+    global xyreturn,switch,p1,p2,geo,a,b
     (grabbed,frame) = capture.read()
     #frame = frame[pt1y:pt2y,pt1x:pt2x]
     height,width,channel = frame.shape
@@ -100,19 +99,18 @@ def fix_point(capture):
 
         if key == ord("c"):
 
-            if len(crp_lst) >= 1 and geo != 1:
+            if len(crp_lst) >= 1:
 
                 p1 = min(crp_lst)[0]/float(width),min(crp_lst)[1]/float(height)
                 p2 = crp_lst[-1][0]/float(width),crp_lst[-1][1]/float(height)
 
-            if len(crp_lst) >= 1 and geo == 1:
-
-                center = (min(crp_lst)[0]/float(width),min(crp_lst)[1]/float(height))
-                a = ((crp_lst[-1][0]-min(crp_lst)[0])^2)/float(width)
-                b = ((crp_lst[-1][1]-min(crp_lst)[1])^2)/float(height)
+                a = (crp_lst[-1][0]/float(width)-p1[0])
+                b = (crp_lst[-1][1]/float(height)-p1[1])
+                # a = ((crp_lst[-1][0]-min(crp_lst)[0])^2)/float(width)
+                # b = ((crp_lst[-1][1]-min(crp_lst)[1])^2)/float(height)
                 # r = math.sqrt(a+b)
                 # r = int(math.hypot((crp_lst[-1][0]-center[0]*float(width)),(crp_lst[-1][1]-center[1]*float(height))))
-                r = (math.hypot((crp_lst[-1][0]/float(width)-center[0]),(crp_lst[-1][1]/float(height)-center[1])))
+                # r = (math.hypot((crp_lst[-1][0]/float(width)-p1[0]),(crp_lst[-1][1]/float(height)-p1[1])))
         #     p1 =(min(crp_lst)[0]/float(width),min(crp_lst)[1]/float(height))
         #     p2 =(crp_lst[-1][0]/float(width),crp_lst[-1][1]/float(height))
         # cv2.waitKey(30)
@@ -203,7 +201,8 @@ class analyser(QObject):
                     # geometryObject.drawShape()
                     cv2.rectangle(frame,(int(p1[0]*float(width)),int(p1[1]*float(height))),(int(p2[0]*float(width)),int(p2[1]*float(height))),(0,0,255),2)
                 else:
-                    cv2.circle(frame,(int(center[0]*float(width)),int(center[1]*float(height))),int(r*width),(0,0,255),2)
+                    r = math.hypot(a*float(width),b*float(height))
+                    cv2.circle(frame,(int(p1[0]*float(width)),int(p1[1]*float(height))),int(r),(0,0,255),2)
 
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 gray = cv2.GaussianBlur(gray, (21, 21), 0)
@@ -262,8 +261,8 @@ class analyser(QObject):
 
                         # Circle
                         if geo != 0:
-                            if (math.pow((self.divide_x - center[0]),2) + math.pow((self.divide_y - center[1]),2)) < math.pow(r,2):
-                                cv2.line(frame,(int(width*self.divide_x),int(center[1]*height)),(int(width*self.divide_x),int((center[1]+r)*height)),(255,0,0))
+                            if (math.pow((self.divide_x - p1[0]),2) + math.pow((self.divide_y - p1[1]),2)) < math.pow(r,2):
+                                cv2.line(frame,(int(width*self.divide_x),int(p1[1]*height)),(int(width*self.divide_x),int((p1[1]+r)*height)),(255,0,0))
                             else:
                                 print("ERROR: Center divide outside of bounding area")
 
