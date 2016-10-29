@@ -246,8 +246,7 @@ class analyser(QObject):
                         (x, y, w, h) = cv2.boundingRect(c)
                         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 1)
 
-                        # Rectangle
-                        if geo == 0:
+                        if geometryObject.within([x,y]) == True:
 
                             if p2[0] >= self.divide_x >= p1[0]:
                                 cv2.line(frame,(int(width*self.divide_x),int(p1[1]*height)),(int(width*self.divide_x),int(p2[1]*height)),(255,0,0))
@@ -258,14 +257,6 @@ class analyser(QObject):
                                 cv2.line(frame,(int(p1[0]*width),int(self.divide_y*height)),(int(p2[0]*width),int(self.divide_y*height)),(255,0,0))
                             else:
                                 print("ERROR: Center divide outside of bounding area")
-
-                        # Circle
-                        if geo != 0:
-                            if (math.pow((self.divide_x - p1[0]),2) + math.pow((self.divide_y - p1[1]),2)) < math.pow(r,2):
-                                cv2.line(frame,(int(width*self.divide_x),int(p1[1]*height)),(int(width*self.divide_x),int((p1[1]+r)*height)),(255,0,0))
-                            else:
-                                print("ERROR: Center divide outside of bounding area")
-
 
                         fish_x = float(x+w/2) / float(width)
                         fish_y = float(y+h/2) / float(height)
