@@ -88,7 +88,7 @@ def fix_point(capture):
 
         if len(crp_lst) >= 1 and geo == 1:
             cv2.circle(frame,min(crp_lst),int(math.hypot((crp_lst[-1][0]-min(crp_lst)[0]),(crp_lst[-1][1]-min(crp_lst)[1]))),(0,0,255),2)
-        #
+            geometryObject = (min(crp_lst),int(math.hypot((crp_lst[-1][0]-min(crp_lst)[0]),(crp_lst[-1][1]-min(crp_lst)[1]))))
         #     print(a,b,c,d,r)
         #
         # else:
@@ -131,7 +131,7 @@ class analyser(QObject):
     framecount = pyqtSignal(int,name='framecount')
     #frameshape = pyqtSignal(int,int,name='frameshape')
 
-    def __init__(self,videofile,x,y,wait,min_area,timelimit,refresh,show):
+    def __init__(self,videofile,x,y,wait,min_area,timelimit,refresh,show,fragment):
         QObject.__init__(self)
         self.capture = self.set_input(videofile)
         self.divide_x = x
@@ -143,6 +143,7 @@ class analyser(QObject):
         self.refresh = refresh
         self.show = show
         self.lastframe = None
+        self.fragment = fragment
 
     def set_input(self, videofile):
          """Get capture of video file.If not defined, return Webcam output """
@@ -200,6 +201,7 @@ class analyser(QObject):
                 if geo == 0:
                     # geometryObject.drawShape()
                     cv2.rectangle(frame,(int(p1[0]*float(width)),int(p1[1]*float(height))),(int(p2[0]*float(width)),int(p2[1]*float(height))),(0,0,255),2)
+                    r=width*math.sqrt(2)/2
                 else:
                     r = math.hypot(a*float(width),b*float(height))
                     cv2.circle(frame,(int(p1[0]*float(width)),int(p1[1]*float(height))),int(r),(0,0,255),2)
@@ -246,7 +248,18 @@ class analyser(QObject):
                         (x, y, w, h) = cv2.boundingRect(c)
                         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 1)
 
-                        if geometryObject.within([x,y]) == True:
+                        fish_x = float(x+w/2) / float(width)
+                        fish_y = float(y+h/2) / float(height)
+
+                        for i in range(0,self.fragment):
+
+                            angle = math.radians(i*(360/self.fragment))
+                            point_x = int(self.divide_x + int(r) * math.cos(angle))
+                            point_y = int(self.divide_y + int(r) * math.sin(angle))
+                            print(point_x,point_y,angle)
+                            # cv2.line(frame,(int(point_x),int(point_y)),(int(self.divide_x*width),int(self.divide_y*height)),(255,0,0))
+
+                        if geo != 1:
 
                             if p2[0] >= self.divide_x >= p1[0]:
                                 cv2.line(frame,(int(width*self.divide_x),int(p1[1]*height)),(int(width*self.divide_x),int(p2[1]*height)),(255,0,0))
@@ -258,8 +271,13 @@ class analyser(QObject):
                             else:
                                 print("ERROR: Center divide outside of bounding area")
 
-                        fish_x = float(x+w/2) / float(width)
-                        fish_y = float(y+h/2) / float(height)
+                        if geo == 1:
+                                # cv2.line(frame,(int(self.divide_x*width),int(self.divide_y*height)-int(r)),(int(self.divide_x*width),int(self.divide_y*height)+int(r)),(255,0,0))
+                                # cv2.line(frame,(int(self.divide_x*width)-int(r),int(self.divide_y*height)),(int(self.divide_x*width)+int(r),int(self.divide_y*height)),(255,0,0))
+                                cv2.line(frame,(int(self.divide_x*width),int(self.divide_y)),(int(self.divide_x*width),int(height)),(255,0,0))
+                                cv2.line(frame,(int(self.divide_x),int(self.divide_y*height)),(int(width),int(self.divide_y*height)),(255,0,0))
+
+
 
                         # if (float(pt1x)/float(width))<fish_x<(float(pt2x)/float(width)) and (float(pt1y)/float(height))<fish_y<(float(pt2y)/float(height)):
                         self.trace_xy.append((fish_x,fish_y))

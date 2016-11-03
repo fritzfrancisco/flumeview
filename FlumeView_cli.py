@@ -38,6 +38,7 @@ ap.add_argument("-r","--refresh",type=int,default=10,help="refresh every n frame
 ap.add_argument("-p","--print",type=str,default="",help="save data to given file")
 ap.add_argument("-i","--image",type=str,default="",help="save live view to given image file")
 ap.add_argument("-d","--dump",type=str,default="",help="save all data to given file")
+ap.add_argument("-f","--fragment",type=int,default=4,help="number of fragments in which tracking should be preformed")
 #ap.add_argument("-s","--shape",type=str,default="rectangle",help="shape of test arena")
 args = vars(ap.parse_args())
 print(args)
@@ -55,7 +56,7 @@ else:
 
 # get functions from FlumeView_analyser
 #capture = fv.set_input(args["video"])
-analyser = fv.analyser(args["video"],divide_x,divide_y,args["wait"],args["min_area"],args["timelimit"],args["refresh"],args["show"])
+analyser = fv.analyser(args["video"],divide_x,divide_y,args["wait"],args["min_area"],args["timelimit"],args["refresh"],args["show"],args["fragment"])
 
 # new class for accepting data from analyser
 class fish_data(QObject):

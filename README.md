@@ -55,9 +55,11 @@ followed by the additional arguments for specification:
 
 When the left mouse button is held down a rectangular frame can be created, to which the area in which an object can be tracked is limited, excluding any outside movement. Once a sufficient area is chosen it can be selected by pushing the "c" (crop) key. The tracking is then initiated by double-clicking on the desired center-point within the rectangle.
 
-<img src="https://github.com/fritzfrancisco/flumeview/blob/master/screenshot_crop.png" width="400">
+<img src="https://github.com/fritzfrancisco/flumeview/blob/workingbranch/screenshot_crop_rect.png" width="300"/> <img src="https://github.com/fritzfrancisco/flumeview/blob/workingbranch/screenshot_crop_circ.png" width="300"/>
 
-Image 4.: Screenshot: Cropping function
+<!-- <img src="https://github.com/fritzfrancisco/flumeview/blob/master/screenshot_crop_rect.png" width="400"> <img src="https://github.com/fritzfrancisco/flumeview/blob/master/screenshot_crop_circ.png" width="400"> -->
+
+Image 4 & 5.: Screenshot: Cropping function
 
 If no cropping  area is selected the center selection via double click is sufficient.
 
