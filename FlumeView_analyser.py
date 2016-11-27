@@ -13,6 +13,7 @@ from frigeometry import FriGeometry
 from frirect import FriRect
 from fricirc import FriCirc
 
+geometryObject = FriGeometry()
 xyreturn = None
 switch = 0
 crp_lst = []
@@ -21,11 +22,9 @@ p2 = (1,1)
 geo = 0
 r = 0
 
-
-geometryObject = FriGeometry()
-
 def divide_frame(event,x,y,flags,param):
     global xyreturn, switch, crp_lst, geo, geometryObject
+
 
     if event == cv2.EVENT_LBUTTONDOWN:
         switch = 1
@@ -42,19 +41,22 @@ def divide_frame(event,x,y,flags,param):
         crp_lst.append((x,y))
 
     if event == cv2.EVENT_RBUTTONDOWN:
+
         if geo == 0:
             geo = 1
             crp_lst = [(x,y)]
+
         else:
-            geo = geo - 1
+            # geo = geo - 1
             crp_lst = [(x,y)]
 
     if geo == 1:
         #selected circle
         geometryObject = FriCirc(p1,r)
+        # geometryObject = FriCirc(p1,r)
 
     else:
-        #selected recangle obviously
+        #selected rectangle
         geometryObject = FriRect(p1,p2)
 
 
@@ -69,7 +71,7 @@ def set_input(videofile):
         return cv2.VideoCapture(videofile)
 
 def fix_point(capture):
-    global xyreturn,switch,p1,p2,geo,a,b
+    global xyreturn,switch,p1,p2,geo,a,b,r
     (grabbed,frame) = capture.read()
     #frame = frame[pt1y:pt2y,pt1x:pt2x]
     height,width,channel = frame.shape
@@ -82,15 +84,12 @@ def fix_point(capture):
         key = cv2.waitKey(30) & 0xFF
 
         if len(crp_lst) >= 1 and geo != 1:
-
             cv2.rectangle(frame,min(crp_lst),crp_lst[-1],(0,0,255),2)
             # geo = 0
 
         if len(crp_lst) >= 1 and geo == 1:
             cv2.circle(frame,min(crp_lst),int(math.hypot((crp_lst[-1][0]-min(crp_lst)[0]),(crp_lst[-1][1]-min(crp_lst)[1]))),(0,0,255),2)
-            geometryObject = (min(crp_lst),int(math.hypot((crp_lst[-1][0]-min(crp_lst)[0]),(crp_lst[-1][1]-min(crp_lst)[1]))))
-        #     print(a,b,c,d,r)
-        #
+            # geometryObject = (min(crp_lst),int(math.hypot((crp_lst[-1][0]-min(crp_lst)[0]),(crp_lst[-1][1]-min(crp_lst)[1]))))
         # else:
         #     crp_lst.append((0,0))
         #     crp_lst.append((int(width),int(height)))
@@ -106,11 +105,13 @@ def fix_point(capture):
 
                 a = (crp_lst[-1][0]/float(width)-p1[0])
                 b = (crp_lst[-1][1]/float(height)-p1[1])
+                # r = int(math.hypot((crp_lst[-1][0]-min(crp_lst)[0]),(crp_lst[-1][1]-min(crp_lst)[1])))
                 # a = ((crp_lst[-1][0]-min(crp_lst)[0])^2)/float(width)
                 # b = ((crp_lst[-1][1]-min(crp_lst)[1])^2)/float(height)
+                # r = math.hypot(a*float(width),b*float(height))
                 # r = math.sqrt(a+b)
                 # r = int(math.hypot((crp_lst[-1][0]-center[0]*float(width)),(crp_lst[-1][1]-center[1]*float(height))))
-                # r = (math.hypot((crp_lst[-1][0]/float(width)-p1[0]),(crp_lst[-1][1]/float(height)-p1[1])))
+                r = (math.hypot((crp_lst[-1][0]/float(width)-p1[0]),(crp_lst[-1][1]/float(height)-p1[1])))
         #     p1 =(min(crp_lst)[0]/float(width),min(crp_lst)[1]/float(height))
         #     p2 =(crp_lst[-1][0]/float(width),crp_lst[-1][1]/float(height))
         # cv2.waitKey(30)
@@ -144,6 +145,7 @@ class analyser(QObject):
         self.show = show
         self.lastframe = None
         self.fragment = fragment
+        self.geometryObject = geometryObject
 
     def set_input(self, videofile):
          """Get capture of video file.If not defined, return Webcam output """
@@ -201,10 +203,12 @@ class analyser(QObject):
                 if geo == 0:
                     # geometryObject.drawShape()
                     cv2.rectangle(frame,(int(p1[0]*float(width)),int(p1[1]*float(height))),(int(p2[0]*float(width)),int(p2[1]*float(height))),(0,0,255),2)
-                    r=width*math.sqrt(2)/2
+                    r = (p2[0]-p1[0])*width*(math.sqrt(2)/2)
+
                 else:
                     r = math.hypot(a*float(width),b*float(height))
                     cv2.circle(frame,(int(p1[0]*float(width)),int(p1[1]*float(height))),int(r),(0,0,255),2)
+
 
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 gray = cv2.GaussianBlur(gray, (21, 21), 0)
@@ -251,31 +255,42 @@ class analyser(QObject):
                         fish_x = float(x+w/2) / float(width)
                         fish_y = float(y+h/2) / float(height)
 
+                        self.lastframe = frame
+
                         for i in range(0,self.fragment):
 
                             angle = math.radians(i*(360/self.fragment))
-                            point_x = int(self.divide_x + int(r) * math.cos(angle))
-                            point_y = int(self.divide_y + int(r) * math.sin(angle))
-                            print(point_x,point_y,angle)
-                            # cv2.line(frame,(int(point_x),int(point_y)),(int(self.divide_x*width),int(self.divide_y*height)),(255,0,0))
 
-                        if geo != 1:
+                            if geo == 1:
+                                # Circle
+                                point_x = int(p1[0]*width + int(r) * math.cos(angle))
+                                point_y = int(p1[1]*height + int(r) * math.sin(angle))
+                                cv2.line(frame,(point_x,point_y),(int(p1[0]*float(width)),int(p1[1]*float(height))),(255,0,0))
 
-                            if p2[0] >= self.divide_x >= p1[0]:
-                                cv2.line(frame,(int(width*self.divide_x),int(p1[1]*height)),(int(width*self.divide_x),int(p2[1]*height)),(255,0,0))
                             else:
-                                print("ERROR: Center divide outside of bounding area")
+                                # Rectangle
+                                point_x = int(self.divide_x*width+int(r) * math.cos(angle))
+                                point_y = int(self.divide_y*height+int(r) * math.sin(angle))
+                                cv2.line(frame,(point_x,point_y),(int(self.divide_x*width),int(self.divide_y*height)),(255,0,0))
+                                # print(point_x,point_y,r)
 
-                            if p2[1] >= self.divide_y >= p1[1]:
-                                cv2.line(frame,(int(p1[0]*width),int(self.divide_y*height)),(int(p2[0]*width),int(self.divide_y*height)),(255,0,0))
-                            else:
-                                print("ERROR: Center divide outside of bounding area")
+                        # if geo != 1:
+                        #
+                        #     if p2[0] >= self.divide_x >= p1[0]:
+                        #         cv2.line(frame,(int(width*self.divide_x),int(p1[1]*height)),(int(width*self.divide_x),int(p2[1]*height)),(255,0,0))
+                        #     else:
+                        #         print("ERROR: Center divide outside of bounding area")
+                        #
+                        #     if p2[1] >= self.divide_y >= p1[1]:
+                        #         cv2.line(frame,(int(p1[0]*width),int(self.divide_y*height)),(int(p2[0]*width),int(self.divide_y*height)),(255,0,0))
+                        #     else:
+                        #         print("ERROR: Center divide outside of bounding area")
 
-                        if geo == 1:
-                                # cv2.line(frame,(int(self.divide_x*width),int(self.divide_y*height)-int(r)),(int(self.divide_x*width),int(self.divide_y*height)+int(r)),(255,0,0))
-                                # cv2.line(frame,(int(self.divide_x*width)-int(r),int(self.divide_y*height)),(int(self.divide_x*width)+int(r),int(self.divide_y*height)),(255,0,0))
-                                cv2.line(frame,(int(self.divide_x*width),int(self.divide_y)),(int(self.divide_x*width),int(height)),(255,0,0))
-                                cv2.line(frame,(int(self.divide_x),int(self.divide_y*height)),(int(width),int(self.divide_y*height)),(255,0,0))
+                        # if geo == 1:
+                        #         # cv2.line(frame,(int(self.divide_x*width),int(self.divide_y*height)-int(r)),(int(self.divide_x*width),int(self.divide_y*height)+int(r)),(255,0,0))
+                        #         # cv2.line(frame,(int(self.divide_x*width)-int(r),int(self.divide_y*height)),(int(self.divide_x*width)+int(r),int(self.divide_y*height)),(255,0,0))
+                        #         cv2.line(frame,(int(self.divide_x*width),int(self.divide_y)),(int(self.divide_x*width),int(height)),(255,0,0))
+                        #         cv2.line(frame,(int(self.divide_x),int(self.divide_y*height)),(int(width),int(self.divide_y*height)),(255,0,0))
 
 
 
@@ -311,8 +326,6 @@ class analyser(QObject):
 
                     else:
                         print("Wait:"+str("{0:.2f}".format(self.frame_count/self.fps))+" s ;"+str(self.frame_count)+" frames")
-
-            self.lastframe = frame
 
             if self.show == True:
                 cv2.imshow("FlumeView - Live",frame)
