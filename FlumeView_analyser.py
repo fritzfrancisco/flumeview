@@ -145,7 +145,6 @@ class analyser(QObject):
         self.show = show
         self.lastframe = None
         self.fragment = fragment
-        self.geometryObject = geometryObject
 
     def set_input(self, videofile):
          """Get capture of video file.If not defined, return Webcam output """
@@ -161,7 +160,7 @@ class analyser(QObject):
 
         #cv2.namedWindow("Security Feed")
 
-        self.fps = self.capture.get(cv2.cv.CV_CAP_PROP_FPS)
+        self.fps = self.capture.get(cv2.CAP_PROP_FPS)
 
         self.frame_count = 0
         self.count_start = bool
@@ -172,10 +171,13 @@ class analyser(QObject):
         # if self.firstFrame is None:
         #     self.firstFrame = gray
 
+        #Creating backgound subtractor
+        fgbg = cv2.createBackgroundSubtractorMOG2(history = 10000, varThreshold = 30, detectShadows=False)
+        kernel = np.ones((3,3))
+
         while True:
 
             if (self.frame_count/self.fps)>self.timelimit:
-
                 self.capture.release()
                 return(-1,-1)
 
@@ -209,12 +211,14 @@ class analyser(QObject):
                     r = math.hypot(a*float(width),b*float(height))
                     cv2.circle(frame,(int(p1[0]*float(width)),int(p1[1]*float(height))),int(r),(0,0,255),2)
 
-
                 gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                 gray = cv2.GaussianBlur(gray, (21, 21), 0)
+                # fgmask = fgbg.apply(blur)
+                # erode = cv2.erode(fgmask, kernel)
+                # dilate = cv2.erode(erode, kernel)
 
                 #if self.firstFrame is None:
-                if self.firstFrame == None:
+                if self.firstFrame is None:
                     self.firstFrame = gray
 
                 self.frame_count += 1
@@ -227,7 +231,7 @@ class analyser(QObject):
             	# dilate the thresholded image to fill in holes, then find contours
             	# on thresholded image
                 thresh = cv2.dilate(thresh, None, iterations=2)
-                (cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                _, cnts, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
 
                 if (self.frame_count/self.fps)<self.wait:
@@ -323,13 +327,16 @@ class analyser(QObject):
                                 #cv2.line(frame,element,previous_element,(125,20,200),2)
                                 #cv2.circle(frame,element,1,(self.frame_count,255,0),1)
 
-
                     else:
                         print("Wait:"+str("{0:.2f}".format(self.frame_count/self.fps))+" s ;"+str(self.frame_count)+" frames")
+
 
             if self.show == True:
                 cv2.imshow("FlumeView - Live",frame)
                 cv2.waitKey(25)
+
+            if cv2.waitKey(30) & 0xFF == 27:
+                break
 
             #matplotlib
 

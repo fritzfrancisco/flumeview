@@ -11,5 +11,4 @@ class FriCirc(FriGeometry):
         return (abs(point[0] - self.center[0])**2 + abs(point[1] - self.center[1])**2) < self.radius**2
 
     def drawShape(self,onFrame):
-
         return onFrame

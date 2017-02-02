@@ -77,7 +77,7 @@ class fish_data(QObject):
             cv2.imshow("FlumeView",frame)
 
     def on_framecount(self,frame_count):
-    #
+
     #     #self.frame_list = []
         self.frame_count = frame_count
     #     self.frame_list.append(frame_count)
@@ -90,7 +90,11 @@ class fish_data(QObject):
 
         if self.count_start == True:
 
-            stats.calculate(x,y,divide_x,divide_y)
+            stats.calculate(x,y,divide_x,divide_y,args["click"],args['fragment'])
+
+        else:
+
+            return
 
         # if args["refresh"] > 0 and args["show"] == True:
         #
@@ -98,10 +102,13 @@ class fish_data(QObject):
 
         #print data
         print("Total Time [s]:	"+"{0:.2f}".format(self.frame_count/analyser.fps - args["wait"]))
-        print("Channel_A [s]:	"+"{0:.2f}".format(stats.channel_A/analyser.fps))
-        print("Channel_B [s]:	"+"{0:.2f}".format(stats.channel_B/analyser.fps))
-        print("Area_A [s]:	"+"{0:.2f}".format(stats.area_A/analyser.fps))
-        print("Area_B [s]:	"+"{0:.2f}".format(stats.area_B/analyser.fps))
+        # print("Channel_A [s]:	"+"{0:.2f}".format(stats.channel_A/analyser.fps))
+        # print("Channel_B [s]:	"+"{0:.2f}".format(stats.channel_B/analyser.fps))
+        # print("Area_A [s]:	"+"{0:.2f}".format(stats.area_A/analyser.fps))
+        # print("Area_B [s]:	"+"{0:.2f}".format(stats.area_B/analyser.fps))
+        for i in range(len(stats.cnts)):
+
+            print "Area "+ str(i+1) + ": " + "{0:.2f}".format(stats.cnts[i]/analyser.fps)
 
         # Print data to file (data.csv)
         # Write file and header if file does not already exist
